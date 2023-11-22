@@ -5,8 +5,11 @@ import (
 	"net/http"
 )
 
-func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new movie")
+func (app *application) createMovieHandler(w http.ResponseWriter, _ *http.Request) {
+	_, err := fmt.Fprintln(w, "create a new movie")
+	if err != nil {
+		return
+	}
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -14,5 +17,8 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 	}
-	fmt.Fprintf(w, "show the details of movie %d\n", id)
+	_, err = fmt.Fprintf(w, "show the details of movie %d\n", id)
+	if err != nil {
+		return
+	}
 }
