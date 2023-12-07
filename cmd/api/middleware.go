@@ -9,7 +9,6 @@ import (
 	"github.com/xuche123/greenlight/internal/data"
 	"github.com/xuche123/greenlight/internal/validation"
 	"golang.org/x/time/rate"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -61,12 +60,9 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.limiter.enabled {
 			ip := realip.FromRequest(r)
-			ip, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				app.serverErrorResponse(w, r, err)
-				return
-			}
+
 			mu.Lock()
+
 			if _, found := clients[ip]; !found {
 				clients[ip] = &client{
 					limiter: rate.NewLimiter(rate.Limit(app.config.limiter.rps), app.config.limiter.burst),
@@ -78,6 +74,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 				app.rateLimitExceededResponse(w, r)
 				return
 			}
+
 			mu.Unlock()
 		}
 		next.ServeHTTP(w, r)
